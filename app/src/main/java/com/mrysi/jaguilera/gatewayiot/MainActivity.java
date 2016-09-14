@@ -10,17 +10,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
 import com.orbotix.ConvenienceRobot;
-import com.orbotix.DualStackDiscoveryAgent;
 import com.orbotix.Ollie;
-import com.orbotix.Sphero;
 import com.orbotix.async.DeviceSensorAsyncMessage;
-import com.orbotix.classic.RobotClassic;
 import com.orbotix.common.DiscoveryException;
 import com.orbotix.common.ResponseListener;
 import com.orbotix.common.Robot;
-import com.orbotix.common.RobotChangedStateListener;
 import com.orbotix.common.internal.AsyncMessage;
 import com.orbotix.common.internal.DeviceResponse;
 import com.orbotix.common.sensor.AccelerometerData;
@@ -30,14 +25,22 @@ import com.orbotix.common.sensor.DeviceSensorsData;
 import com.orbotix.common.sensor.GyroData;
 import com.orbotix.common.sensor.QuaternionSensor;
 import com.orbotix.common.sensor.SensorFlag;
+import com.orbotix.DualStackDiscoveryAgent;
 import com.orbotix.le.RobotLE;
+import com.orbotix.common.RobotChangedStateListener;
 import com.orbotix.subsystem.SensorControl;
+import com.pubnub.api.*;
+
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements View.OnClickListener, RobotChangedStateListener,
         ResponseListener {
+
+
 
     private ConvenienceRobot mRobot;
 
@@ -67,18 +70,17 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     private TextView mLeftMotor;
     private TextView mRightMotor;
 
+    private String subscribeKey = "demo";
+    private String publishKey = "demo";
+    Pubnub pubnub = new Pubnub(publishKey,subscribeKey);
+
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         initViews();
-        /*
-            Associate a listener for robot state changes with the DualStackDiscoveryAgent.
-            DualStackDiscoveryAgent checks for both Bluetooth Classic and Bluetooth LE.
-            DiscoveryAgentClassic checks only for Bluetooth Classic robots.
-            DiscoveryAgentLE checks only for Bluetooth LE robots.
-       */
+
         mDiscoveryAgent = new DualStackDiscoveryAgent();
         mDiscoveryAgent.addRobotStateListener(this);
 
@@ -94,6 +96,46 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                 Log.d( "Sphero", "Permiso de Ubicación ha sido autorizado" );
             }
         }
+
+        try {
+            pubnub.subscribe("mrysi-jrap", new Callback() {
+                @Override
+                public void connectCallback(String channel, Object message) {
+                    System.out.println("SUBSCRIBE : CONECTADO al canal:" + channel
+                            + " : " + message.getClass() + " : "
+                            + message.toString());
+                }
+
+                @Override
+                public void disconnectCallback(String channel, Object message) {
+                    System.out.println("SUBSCRIBE : DESCONECTADO del canal:" + channel
+                            + " : " + message.getClass() + " : "
+                            + message.toString());
+                }
+
+                @Override
+                public void reconnectCallback(String channel, Object message) {
+                    System.out.println("SUBSCRIBE : RECONECTADO al canal:" + channel
+                            + " : " + message.getClass() + " : "
+                            + message.toString());
+                }
+
+                @Override
+                public void successCallback(String channel, Object message) {
+                    System.out.println("SUBSCRIBE : " + channel
+                            + " : " + message.getClass() + " : "
+                            + message.toString());
+                }
+
+                @Override
+                public void errorCallback(String channel, PubnubError error) {
+                    System.out.println("SUBSCRIBE : ERROR en el canal:" + channel
+                            + " : " + error.toString());
+                }
+            });
+        } catch (PubnubException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initViews() {
@@ -101,7 +143,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         mBtn90 = (Button) findViewById( R.id.btn_90 );
         mBtn180 = (Button) findViewById( R.id.btn_180 );
         mBtn270 = (Button) findViewById( R.id.btn_270 );
-        mBtnStop = (Button) findViewById( R.id.btn_stop );
+        mBtnStop = (Button) findViewById( R.id.btn_alto );
 
         mBtn0.setOnClickListener( this );
         mBtn90.setOnClickListener( this );
@@ -150,21 +192,25 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         }
     }
 
-    //Turn the robot LED on or off every two seconds
-    private void blink( final boolean lit ) {
+    //Enciende o apaga el LED del Robot cada dos segundos.
+    private void parpadeo( final boolean ledEncendido ) {
+        //Si no hay conexión con el robot se interrumpe la ejecución del método.
         if( mRobot == null )
             return;
 
-        if( lit ) {
+        //Si el led está encendido se apaga.
+        if( ledEncendido ) {
             mRobot.setLed( 0.0f, 0.0f, 0.0f );
         } else {
+        //En caso contrario el led se enciende en color azul.
             mRobot.setLed( 0.0f, 0.0f, 1.0f );
         }
 
+        //Se agrega un retardo entre cada cambio de estado del led.
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
-                blink(!lit);
+                parpadeo(!ledEncendido);
             }
         }, 2000);
     }
@@ -173,6 +219,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     protected void onStart() {
         super.onStart();
 
+        //Se verifica que se tengan los permisos para manejar la conexión Bluetooth.
         if( Build.VERSION.SDK_INT < Build.VERSION_CODES.M
                 || checkSelfPermission( Manifest.permission.ACCESS_COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED ) {
             startDiscovery();
@@ -180,10 +227,10 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     }
 
     private void startDiscovery() {
-        //If the DiscoveryAgent is not already looking for robots, start discovery.
+        //Si el agente de descubrimiento no se encuentra ya buscando robots, se inicia la busqueda.
         if( !mDiscoveryAgent.isDiscovering() ) {
             try {
-                mDiscoveryAgent.startDiscovery(this);
+                mDiscoveryAgent.startDiscovery(getApplicationContext());
             } catch (DiscoveryException e) {
                 Log.e("Sphero", "Excepción de Descubrimiento: " + e.getMessage());
             }
@@ -192,14 +239,14 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
     @Override
     protected void onStop() {
-        //If the DiscoveryAgent is in discovery mode, stop it.
+        //Si el Agente de Descubrimiento está en modo de busqueda, se detiene.
         if( mDiscoveryAgent.isDiscovering() ) {
             mDiscoveryAgent.stopDiscovery();
         }
 
-        //If a robot is connected to the device, disconnect it
+        //Si un robot está conectado, se desconecta.
         if( mRobot != null ) {
-            mRobot.disconnect();
+            mRobot.sleep();
             mRobot = null;
         }
 
@@ -214,39 +261,39 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
     @Override
     public void onClick(View v) {
-        //If the robot is null, then it is probably not connected and nothing needs to be done
+        //Si el objeto mRobot es nulo entonces no hay robot conectado y no se tiene que realizar nada.
         if( mRobot == null ) {
             return;
         }
 
         /*
-            When a heading button is pressed, set the robot to drive in that heading.
-            All directions are based on the back LED being considered the back of the robot.
-            0 moves in the opposite direction of the back LED.
+            Cuando un botón de movimiento es presionado, se manda el comando al robot para moverse
+            en dicha dirección. Todas las direcciones están basadas en la posición del robot al
+            momento de conectarse.
          */
         switch( v.getId() ) {
             case R.id.btn_0: {
-                //Forward
+                //Adelante
                 mRobot.drive( 0.0f, ROBOT_VELOCITY );
                 break;
             }
             case R.id.btn_90: {
-                //To the right
+                //A la derecha.
                 mRobot.drive( 90.0f, ROBOT_VELOCITY );
                 break;
             }
             case R.id.btn_180: {
-                //Backward
+                //Reversa
                 mRobot.drive( 180.0f, ROBOT_VELOCITY );
                 break;
             }
             case R.id.btn_270: {
-                //To the left
+                //A la izquierda
                 mRobot.drive( 270.0f, ROBOT_VELOCITY );
                 break;
             }
-            case R.id.btn_stop: {
-                //Stop the robot
+            case R.id.btn_alto: {
+                //Detiene el robot.
                 mRobot.stop();
                 break;
             }
@@ -258,40 +305,35 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         switch( type ) {
             case Online: {
 
-                //Use bitwise OR operations to create a flag to notify the robot what sensors we're interested in
+                //Se notifica al robot para indicar en cuales sensores estamos interesados.
                 long sensorFlag = SensorFlag.QUATERNION.longValue()
                         | SensorFlag.ACCELEROMETER_NORMALIZED.longValue()
                         | SensorFlag.GYRO_NORMALIZED.longValue()
                         | SensorFlag.MOTOR_BACKEMF_NORMALIZED.longValue()
                         | SensorFlag.ATTITUDE.longValue();
 
-                //If robot uses Bluetooth LE, Developer Mode can be turned on.
-                //This turns off DOS protection. This generally isn't required.
-                /*if( robot instanceof RobotLE) {
-                    ( (RobotLE) robot ).setDeveloperMode( true );
-                }*/
-                if (robot instanceof RobotClassic) {
-                    mRobot = new Sphero(robot);
-                }
+
                 // Bluetooth LE (Ollie)
                 if (robot instanceof RobotLE) {
-                    mRobot = new Ollie(robot);
+                    ((RobotLE) robot).setDeveloperMode(true);
                 }
 
-                //Save the robot as a ConvenienceRobot for additional utility methods
-                mRobot = new ConvenienceRobot( robot );
+                //Se graba el robot como un nuevo Robot Ollie para tener acceso a métodos específicos
+                // del dispositivo.
+                mRobot = new Ollie( robot );
 
-                //Remove stabilization so the robot can be turned in all directions without correcting itself
+                //Se deshabilita la estabilización del robot para permitir mayor amplitud de movimientos.
                 mRobot.enableStabilization(false);
 
-                //Enable sensors based on the flag defined above, and stream their data ten times a second to the mobile device
+                //Se habilitan sensores basado en la notificación definida arriba y se establece que el envío de los datos 10
+                // veces por segundo.
                 mRobot.enableSensors( sensorFlag, SensorControl.StreamingRate.STREAMING_RATE10 );
 
-                //Listen to data responses from the robot
+                //Se agrega un Listener(escucha) para las respuestas del robot.
                 mRobot.addResponseListener(this);
 
-                //Start blinking the robot's LED
-                blink( false );
+                //El led del robot enciende y se apaga mientras la conexión se encuentra activa.
+                parpadeo( false );
 
                 break;
             }
@@ -313,32 +355,39 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         if( asyncMessage == null )
             return;
 
-        //Check the asyncMessage type to see if it is a DeviceSensor message
+        //Verifica el tipo de asyncMessage para ver si es de tipo DeviceSensor.
         if( asyncMessage instanceof DeviceSensorAsyncMessage) {
             DeviceSensorAsyncMessage message = (DeviceSensorAsyncMessage) asyncMessage;
+
+            System.out.println("Este es el mensaje del robot:" + message);
+            
 
             if( message.getAsyncData() == null
                     || message.getAsyncData().isEmpty()
                     || message.getAsyncData().get( 0 ) == null )
                 return;
 
-            //Retrieve DeviceSensorsData from the async message
+            JSONObject mensajeJson = new JSONObject();
+
+            //Extrae el DeviceSensorData del mensaje asíncrono.
             DeviceSensorsData data = message.getAsyncData().get( 0 );
 
-            //Extract the accelerometer data from the sensor data
+            //Extrae los datos del acelerómetro del objeto data.
             displayAccelerometer(data.getAccelerometerData());
 
-            //Extract attitude data (yaw, roll, pitch) from the sensor data
+            //Extrae los datos de attitude (Dirección, alabeo y elevación) del objeto data.
             displayAttitude(data.getAttitudeData());
 
-            //Extract quaternion data from the sensor data
+            //Extrae los datos de los cuaterniones del objeto data.
             displayQuaterions( data.getQuaternion() );
 
-            //Display back EMF data from left and right motors
+            //Extrae los datos de Fuerza Electromotriz Inversa del objeto data.
             displayBackEMF( data.getBackEMFData().getEMFFiltered() );
 
-            //Extract gyroscope data from the sensor data
+            //Extrae los datos del giroscopio del objeto data.
             displayGyroscope( data.getGyroData() );
+
+
         }
     }
 
@@ -361,7 +410,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             return;
         }
 
-        //Display the readings from the X, Y and Z components of the accelerometer
+        //Despliega las lecturas de los componentes X, Y y Z del acelerómetro
         mAccelX.setText( String.format( "%.4f", accelerometer.getFilteredAcceleration().x ) );
         mAccelY.setText( String.format( "%.4f", accelerometer.getFilteredAcceleration().y ) );
         mAccelZ.setText( String.format( "%.4f", accelerometer.getFilteredAcceleration().z ) );
@@ -371,7 +420,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         if( attitude == null )
             return;
 
-        //Display the pitch, roll and yaw from the attitude sensor
+        //Despliega, la elevación, dirección y alabeo de attitude.
         mRollValue.setText( String.format( "%3d", attitude.roll ) + "°" );
         mPitchValue.setText( String.format( "%3d", attitude.pitch ) + "°" );
         mYawValue.setText( String.format( "%3d", attitude.yaw) + "°" );
@@ -381,7 +430,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         if( quaternion == null )
             return;
 
-        //Display the four quaterions data
+        //Despliega los datos de los 4 cuaterniones.
         mQ0Value.setText( String.format( "%.5f", quaternion.getQ0() ) );
         mQ1Value.setText( String.format( "%.5f", quaternion.getQ1()) );
         mQ2Value.setText( String.format( "%.5f", quaternion.getQ2()) );
