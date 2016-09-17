@@ -32,6 +32,7 @@ import com.orbotix.subsystem.SensorControl;
 import com.pubnub.api.*;
 
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -70,8 +71,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     private TextView mLeftMotor;
     private TextView mRightMotor;
 
-    private String subscribeKey = "demo";
-    private String publishKey = "demo";
+    private String subscribeKey = "sub-c-ad722c70-4f35-11e5-9028-02ee2ddab7fe";
+    private String publishKey = "pub-c-d43a5ca7-afad-4341-bd02-b8c20126c5c0";
     Pubnub pubnub = new Pubnub(publishKey,subscribeKey);
 
     @Override
@@ -132,6 +133,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                     System.out.println("SUBSCRIBE : ERROR en el canal:" + channel
                             + " : " + error.toString());
                 }
+
             });
         } catch (PubnubException e) {
             e.printStackTrace();
@@ -359,8 +361,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         if( asyncMessage instanceof DeviceSensorAsyncMessage) {
             DeviceSensorAsyncMessage message = (DeviceSensorAsyncMessage) asyncMessage;
 
-            System.out.println("Este es el mensaje del robot:" + message);
-            
 
             if( message.getAsyncData() == null
                     || message.getAsyncData().isEmpty()
@@ -371,6 +371,33 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
             //Extrae el DeviceSensorData del mensaje asíncrono.
             DeviceSensorsData data = message.getAsyncData().get( 0 );
+
+            AccelerometerData accelerometer = data.getAccelerometerData();
+            GyroData gyrometer = data.getGyroData();
+            AttitudeSensor attitude = data.getAttitudeData();
+            QuaternionSensor quaternion = data.getQuaternion();
+            BackEMFSensor sensor = data.getBackEMFData().getEMFFiltered();
+
+            try {
+                mensajeJson.put("AccX", String.format( "%.4f", accelerometer.getFilteredAcceleration().x));
+                mensajeJson.put("AccY", String.format( "%.4f", accelerometer.getFilteredAcceleration().y));
+                mensajeJson.put("AccZ", String.format( "%.4f", accelerometer.getFilteredAcceleration().z));
+                mensajeJson.put("GyrX", String.valueOf( gyrometer.getRotationRateFiltered().x ));
+                mensajeJson.put("GyrY", String.valueOf( gyrometer.getRotationRateFiltered().y ));
+                mensajeJson.put("GyrZ", String.valueOf( gyrometer.getRotationRateFiltered().z ));
+                mensajeJson.put("AttEle", String.format( "%3d", attitude.pitch ) + "°");
+                mensajeJson.put("AttAla", String.format( "%3d", attitude.roll ) + "°");
+                mensajeJson.put("AttDir", String.format( "%3d", attitude.yaw ) + "°");
+                mensajeJson.put("Qua0", String.format( "%.5f", quaternion.getQ0() ));
+                mensajeJson.put("Qua1", String.format( "%.5f", quaternion.getQ1() ));
+                mensajeJson.put("Qua2", String.format( "%.5f", quaternion.getQ2() ));
+                mensajeJson.put("Qua3", String.format( "%.5f", quaternion.getQ3() ));
+                mensajeJson.put("BEL", String.valueOf( sensor.leftMotorValue ));
+                mensajeJson.put("BER", String.valueOf( sensor.rightMotorValue ));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             //Extrae los datos del acelerómetro del objeto data.
             displayAccelerometer(data.getAccelerometerData());
@@ -387,7 +414,17 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             //Extrae los datos del giroscopio del objeto data.
             displayGyroscope( data.getGyroData() );
 
+            pubnub.publish("mrysi-jrap", mensajeJson, new Callback() {
+                @Override
+                public void successCallback(String channel, Object message) {
+                    System.out.println("Mensaje recibido: " + message);;
+                }
 
+                @Override
+                public void errorCallback(String channel, PubnubError error) {
+                    super.errorCallback(channel, error);
+                }
+            });
         }
     }
 

@@ -24,7 +24,7 @@
         android:layout_marginTop="40dp"
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/btn_90"
-        android:text="0"
+        android:text="0º"
         />
 
     <Button
@@ -34,17 +34,17 @@
         android:minWidth="@dimen/buttondrive_btn_min_width"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/btn_0"
-        android:text="90"
+        android:text="90º"
         />
 
     <Button
-        android:id="@+id/btn_stop"
+        android:id="@+id/btn_alto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="@dimen/buttondrive_btn_min_width"
         android:layout_below="@+id/btn_0"
         android:layout_toLeftOf="@+id/btn_90"
-        android:text="STOP"
+        android:text="ALTO"
         />
 
     <Button
@@ -53,8 +53,8 @@
         android:layout_height="wrap_content"
         android:minWidth="@dimen/buttondrive_btn_min_width"
         android:layout_below="@+id/btn_0"
-        android:layout_toLeftOf="@+id/btn_stop"
-        android:text="270"
+        android:layout_toLeftOf="@+id/btn_alto"
+        android:text="270º"
         />
 
     <Button
@@ -63,8 +63,8 @@
         android:layout_height="wrap_content"
         android:minWidth="@dimen/buttondrive_btn_min_width"
         android:layout_toLeftOf="@+id/btn_90"
-        android:layout_below="@id/btn_stop"
-        android:text="180"
+        android:layout_below="@id/btn_alto"
+        android:text="180º"
         />
 
     <LinearLayout
@@ -81,7 +81,7 @@
         <TextView android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="22sp"
-            android:text="Accelerometer" />
+            android:text="Acelerómetro" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -92,7 +92,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
+                android:paddingLeft="8dp"
                 android:text="x:"
                 android:textSize="16sp"/>
 
@@ -115,7 +115,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
+                android:paddingLeft="8dp"
                 android:text="y:"
                 android:textSize="16sp"/>
 
@@ -138,7 +138,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
+                android:paddingLeft="8dp"
                 android:text="z:"
                 android:textSize="16sp"/>
 
@@ -155,7 +155,7 @@
         <TextView android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="22sp"
-            android:text="Attitude" />
+            android:text="Giroscopio" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -166,178 +166,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="pitch:"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/value_pitch"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="-180°"
-                android:textSize="16sp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="roll:"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/value_roll"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="-180°"
-                android:textSize="16sp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="yaw:"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/value_yaw"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="-180°"
-                android:textSize="16sp"/>
-
-        </LinearLayout>
-
-        <TextView android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="22sp"
-            android:text="Quaternions" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="Q0:"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/value_q0"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="0"
-                android:textSize="16sp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="Q1:"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/value_q1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="0"
-                android:textSize="16sp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="Q2:"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/value_q2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="0"
-                android:textSize="16sp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="Q3:"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:id="@+id/value_q3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="0"
-                android:textSize="16sp"/>
-
-        </LinearLayout>
-
-        <TextView android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="22sp"
-            android:text="Gyroscope" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingLeft="16dp"
+                android:paddingLeft="8dp"
                 android:text="x:"
                 android:textSize="16sp"/>
 
@@ -360,7 +189,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
+                android:paddingLeft="8dp"
                 android:text="y:"
                 android:textSize="16sp"/>
 
@@ -383,7 +212,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
+                android:paddingLeft="8dp"
                 android:text="z:"
                 android:textSize="16sp"/>
 
@@ -396,6 +225,178 @@
                 android:textSize="16sp"/>
 
         </LinearLayout>
+
+        <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:text="Attitude" />
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:text="Elevación:"
+            android:textSize="16sp"/>
+
+            <TextView
+            android:id="@+id/value_pitch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.5"
+            android:text="-180°"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:text="Alabeo:"
+            android:textSize="16sp"/>
+
+            <TextView
+            android:id="@+id/value_roll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.5"
+            android:text="-180°"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:text="Dirección:"
+            android:textSize="16sp"/>
+
+            <TextView
+            android:id="@+id/value_yaw"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.5"
+            android:text="-180°"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:text="Quaternions" />
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:text="Q0:"
+            android:textSize="16sp" />
+
+            <TextView
+            android:id="@+id/value_q0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="0"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:text="Q1:"
+            android:textSize="16sp"/>
+
+            <TextView
+            android:id="@+id/value_q1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="0"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:text="Q2:"
+            android:textSize="16sp"/>
+
+            <TextView
+            android:id="@+id/value_q2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="0"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="8dp"
+            android:text="Q3:"
+            android:textSize="16sp"/>
+
+            <TextView
+            android:id="@+id/value_q3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="0"
+            android:textSize="16sp"/>
+
+        </LinearLayout>
+
 
         <TextView android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -411,15 +412,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="Left Motor:"
+                android:paddingLeft="8dp"
+                android:text="Motor Izq.:"
                 android:textSize="16sp"/>
 
             <TextView
                 android:id="@+id/left_motor"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
+                android:layout_weight="2"
                 android:text="0.0"
                 android:textSize="16sp"/>
 
@@ -434,15 +435,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="16dp"
-                android:text="Right Motor:"
+                android:paddingLeft="8dp"
+                android:text="Motor Der.:"
                 android:textSize="16sp"/>
 
             <TextView
                 android:id="@+id/right_motor"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
+                android:layout_weight="2"
                 android:text="0.0"
                 android:textSize="16sp"/>
 
@@ -451,6 +452,3 @@
     </LinearLayout>
 
 </RelativeLayout>
-
-
-
