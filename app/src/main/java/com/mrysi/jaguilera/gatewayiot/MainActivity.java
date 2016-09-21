@@ -35,6 +35,7 @@ import com.pubnub.api.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,9 +124,59 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
                 @Override
                 public void successCallback(String channel, Object message) {
-                    System.out.println("SUBSCRIBE : " + channel
-                            + " : " + message.getClass() + " : "
-                            + message.toString());
+                    JSONObject jmessage = new JSONObject();
+                    jmessage = (JSONObject) message;
+                    if (mRobot == null && jmessage.length()>2 ) {
+                        System.out.println("SUBSCRIBE : " + channel
+                                + " : " + message.getClass() + " : "
+                                + message.toString());
+
+                        final JSONObject finalJmessage = jmessage;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    displayBackEMF(finalJmessage.getInt("BEL"), finalJmessage.getInt("BER"));
+                                    mGyroX.setText( String.valueOf( finalJmessage.getInt("GyrX") ) );
+                                    mGyroY.setText( String.valueOf( finalJmessage.getInt("GyrY") ) );
+                                    mGyroZ.setText( String.valueOf( finalJmessage.getInt("GyrZ") ) );
+                                    mAccelX.setText( String.format( "%.4f", finalJmessage.getDouble("AccX") ) );
+                                    mAccelY.setText( String.format( "%.4f", finalJmessage.getDouble("AccY") ) );
+                                    mAccelZ.setText( String.format( "%.4f", finalJmessage.getDouble("AccZ") ) );
+                                    mRollValue.setText( finalJmessage.getString("AttAla") );
+                                    mPitchValue.setText( finalJmessage.getString("AttEle") );
+                                    mYawValue.setText( finalJmessage.getString("AttDir") );
+                                    mQ0Value.setText( finalJmessage.getString("Qua0"));
+                                    mQ1Value.setText( finalJmessage.getString("Qua1"));
+                                    mQ2Value.setText( finalJmessage.getString("Qua2"));
+                                    mQ3Value.setText( finalJmessage.getString("Qua3"));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }else if(mRobot != null && jmessage.length() == 2){
+                        System.out.println("SUBSCRIBE : Este dispositivo es el " +
+                                "directamente conectado.");
+
+                        float dir = 0;
+                        float vel = 0;
+                        try {
+                            dir = BigDecimal.valueOf(jmessage.getDouble("Dir")).floatValue();
+                            vel = BigDecimal.valueOf(jmessage.getDouble("Vel")).floatValue();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        if(vel != 0) {
+                            mRobot.drive(dir, vel);
+                        }else{
+                            mRobot.stop();
+                        }
+                    }else{
+                        System.out.println("SUBSCRIBE : Este dispositivo es el " +
+                                "directamente conectado.");
+                    }
                 }
 
                 @Override
@@ -264,7 +315,73 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     @Override
     public void onClick(View v) {
         //Si el objeto mRobot es nulo entonces no hay robot conectado y no se tiene que realizar nada.
+        JSONObject controlJson = new JSONObject();
         if( mRobot == null ) {
+            switch( v.getId() ) {
+                case R.id.btn_0: {
+                    //Adelante
+                    try {
+                        controlJson.put("Dir", 0.0);
+                        controlJson.put("Vel", ROBOT_VELOCITY);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case R.id.btn_90: {
+                    //A la derecha.
+                    try {
+                        controlJson.put("Dir", 90.0);
+                        controlJson.put("Vel", ROBOT_VELOCITY);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case R.id.btn_180: {
+                    //Reversa
+                    try {
+                        controlJson.put("Dir", 180.0);
+                        controlJson.put("Vel", ROBOT_VELOCITY);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case R.id.btn_270: {
+                    //A la izquierda
+                    try {
+                        controlJson.put("Dir", 270.0);
+                        controlJson.put("Vel", ROBOT_VELOCITY);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                case R.id.btn_alto: {
+                    //Detiene el robot.
+                    try {
+                        controlJson.put("Dir", 0.0);
+                        controlJson.put("Vel", 0);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+
+            pubnub.publish("mrysi-jrap", controlJson, new Callback() {
+                @Override
+                public void successCallback(String channel, Object message) {
+                    System.out.println("Mensaje recibido: " + message);
+                }
+
+                @Override
+                public void errorCallback(String channel, PubnubError error) {
+                    super.errorCallback(channel, error);
+                }
+            });
+
             return;
         }
 
@@ -277,29 +394,70 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             case R.id.btn_0: {
                 //Adelante
                 mRobot.drive( 0.0f, ROBOT_VELOCITY );
+                try {
+                    controlJson.put("Dir", 0.0);
+                    controlJson.put("Vel", ROBOT_VELOCITY);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
             case R.id.btn_90: {
                 //A la derecha.
                 mRobot.drive( 90.0f, ROBOT_VELOCITY );
+                try {
+                    controlJson.put("Dir", 90.0);
+                    controlJson.put("Vel", ROBOT_VELOCITY);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
             case R.id.btn_180: {
                 //Reversa
                 mRobot.drive( 180.0f, ROBOT_VELOCITY );
+                try {
+                    controlJson.put("Dir", 180.0);
+                    controlJson.put("Vel", ROBOT_VELOCITY);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
             case R.id.btn_270: {
                 //A la izquierda
                 mRobot.drive( 270.0f, ROBOT_VELOCITY );
+                try {
+                    controlJson.put("Dir", 270.0);
+                    controlJson.put("Vel", ROBOT_VELOCITY);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
             case R.id.btn_alto: {
                 //Detiene el robot.
                 mRobot.stop();
+                try {
+                    controlJson.put("Dir", 0.0);
+                    controlJson.put("Vel", 0);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 break;
             }
         }
+        pubnub.publish("mrysi-jrap", controlJson, new Callback() {
+            @Override
+            public void successCallback(String channel, Object message) {
+                System.out.println("Mensaje recibido: " + message);
+            }
+
+            @Override
+            public void errorCallback(String channel, PubnubError error) {
+                super.errorCallback(channel, error);
+            }
+        });
     }
 
     @Override
@@ -409,7 +567,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             displayQuaterions( data.getQuaternion() );
 
             //Extrae los datos de Fuerza Electromotriz Inversa del objeto data.
-            displayBackEMF( data.getBackEMFData().getEMFFiltered() );
+            int BEL;
+            int BER;
+            BEL = data.getBackEMFData().getEMFFiltered().leftMotorValue;
+            BER = data.getBackEMFData().getEMFFiltered().rightMotorValue;
+            displayBackEMF( BEL, BER );
 
             //Extrae los datos del giroscopio del objeto data.
             displayGyroscope( data.getGyroData() );
@@ -417,7 +579,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             pubnub.publish("mrysi-jrap", mensajeJson, new Callback() {
                 @Override
                 public void successCallback(String channel, Object message) {
-                    System.out.println("Mensaje recibido: " + message);;
+                    System.out.println("Mensaje recibido: " + message);
                 }
 
                 @Override
@@ -428,12 +590,12 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         }
     }
 
-    private void displayBackEMF( BackEMFSensor sensor ) {
-        if( sensor == null )
-            return;
+    private void displayBackEMF( int BEL, int BER ) {
+        /*if( sensor == null )*/
+        /*    return;*/
 
-        mLeftMotor.setText( String.valueOf( sensor.leftMotorValue ) );
-        mRightMotor.setText( String.valueOf( sensor.rightMotorValue ) );
+        mLeftMotor.setText( String.valueOf( BEL ) );
+        mRightMotor.setText( String.valueOf( BER ) );
     }
 
     private void displayGyroscope( GyroData data ) {
@@ -468,7 +630,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             return;
 
         //Despliega los datos de los 4 cuaterniones.
-        mQ0Value.setText( String.format( "%.5f", quaternion.getQ0() ) );
+        mQ0Value.setText( String.format( "%.5f", quaternion.getQ0()) );
         mQ1Value.setText( String.format( "%.5f", quaternion.getQ1()) );
         mQ2Value.setText( String.format( "%.5f", quaternion.getQ2()) );
         mQ3Value.setText( String.format( "%.5f", quaternion.getQ3()) );
