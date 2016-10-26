@@ -47,7 +47,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     private ConvenienceRobot mRobot;
 
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 42;
-    private static final float ROBOT_VELOCITY = 0.6f;
+    private static final float ROBOT_VELOCITY = 0.3f;
 
     private DualStackDiscoveryAgent mDiscoveryAgent;
 
@@ -56,6 +56,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     private Button mBtn180;
     private Button mBtn270;
     private Button mBtnStop;
+    private TextView mRol;
     private TextView mAccelX;
     private TextView mAccelY;
     private TextView mAccelZ;
@@ -123,6 +124,12 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                 }
 
                 @Override
+                public void errorCallback(String channel, PubnubError error) {
+                    System.out.println("SUBSCRIBE : ERROR en el canal:" + channel
+                            + " : " + error.toString());
+                }
+
+                @Override
                 public void successCallback(String channel, Object message) {
                     JSONObject jmessage = new JSONObject();
                     jmessage = (JSONObject) message;
@@ -175,14 +182,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                         }
                     }else{
                         System.out.println("SUBSCRIBE : Este dispositivo es el " +
-                                "directamente conectado.");
+                                "dispositivo remoto.");
                     }
-                }
-
-                @Override
-                public void errorCallback(String channel, PubnubError error) {
-                    System.out.println("SUBSCRIBE : ERROR en el canal:" + channel
-                            + " : " + error.toString());
                 }
 
             });
@@ -494,6 +495,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
                 //El led del robot enciende y se apaga mientras la conexión se encuentra activa.
                 parpadeo( false );
+                mRol = (TextView) findViewById( R.id.rol );
+                mRol.setText("Gateway IOT");
 
                 break;
             }
@@ -525,11 +528,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                     || message.getAsyncData().get( 0 ) == null )
                 return;
 
-            JSONObject mensajeJson = new JSONObject();
-
             //Extrae el DeviceSensorData del mensaje asíncrono.
             DeviceSensorsData data = message.getAsyncData().get( 0 );
 
+            //Preparación de Objeto Json.
+            JSONObject mensajeJson = new JSONObject();
             AccelerometerData accelerometer = data.getAccelerometerData();
             GyroData gyrometer = data.getGyroData();
             AttitudeSensor attitude = data.getAttitudeData();
