@@ -374,7 +374,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             pubnub.publish("mrysi-jrap", controlJson, new Callback() {
                 @Override
                 public void successCallback(String channel, Object message) {
-                    System.out.println("Mensaje recibido: " + message);
+                    System.out.println("Mensaje de control recibido: " + message);
                 }
 
                 @Override
@@ -451,7 +451,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         pubnub.publish("mrysi-jrap", controlJson, new Callback() {
             @Override
             public void successCallback(String channel, Object message) {
-                System.out.println("Mensaje recibido: " + message);
+                System.out.println("Mensaje de control recibido: " + message);
             }
 
             @Override
@@ -582,7 +582,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
             pubnub.publish("mrysi-jrap", mensajeJson, new Callback() {
                 @Override
                 public void successCallback(String channel, Object message) {
-                    System.out.println("Mensaje recibido: " + message);
+                    System.out.println("Mensaje de información recibido: " + message);
                 }
 
                 @Override
