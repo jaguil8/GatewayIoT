@@ -48,6 +48,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 42;
     private static final float ROBOT_VELOCITY = 0.3f;
+    private int mensajesPublicados = 0;
 
     private DualStackDiscoveryAgent mDiscoveryAgent;
 
@@ -57,6 +58,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     private Button mBtn270;
     private Button mBtnStop;
     private TextView mRol;
+    private TextView mTextMensajes;
+    private TextView mIntMensajes;
     private TextView mAccelX;
     private TextView mAccelY;
     private TextView mAccelZ;
@@ -157,6 +160,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                                     mQ1Value.setText( finalJmessage.getString("Qua1"));
                                     mQ2Value.setText( finalJmessage.getString("Qua2"));
                                     mQ3Value.setText( finalJmessage.getString("Qua3"));
+                                    
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -497,7 +501,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                 parpadeo( false );
                 mRol = (TextView) findViewById( R.id.rol );
                 mRol.setText("Gateway IOT");
-
+                mTextMensajes = (TextView) findViewById( R.id.textMensajes);
+                mTextMensajes.setText("Mensajes Enviados");
+                mIntMensajes = (TextView) findViewById( R.id.mensajes_recibidos);
                 break;
             }
         }
@@ -555,6 +561,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                 mensajeJson.put("Qua3", String.format( "%.5f", quaternion.getQ3() ));
                 mensajeJson.put("BEL", String.valueOf( sensor.leftMotorValue ));
                 mensajeJson.put("BER", String.valueOf( sensor.rightMotorValue ));
+                mensajesPublicados = mensajesPublicados + 1;
+                displayIntMensajes(mensajesPublicados);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -594,9 +602,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     }
 
     private void displayBackEMF( int BEL, int BER ) {
-        /*if( sensor == null )*/
-        /*    return;*/
-
         mLeftMotor.setText( String.valueOf( BEL ) );
         mRightMotor.setText( String.valueOf( BER ) );
     }
@@ -637,6 +642,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
         mQ1Value.setText( String.format( "%.5f", quaternion.getQ1()) );
         mQ2Value.setText( String.format( "%.5f", quaternion.getQ2()) );
         mQ3Value.setText( String.format( "%.5f", quaternion.getQ3()) );
+    }
 
+    private void displayIntMensajes(int mensajesPublicados ){
+        mIntMensajes.setText( String.valueOf(mensajesPublicados));
     }
 }
