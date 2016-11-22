@@ -58,8 +58,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     private Button mBtn270;
     private Button mBtnStop;
     private TextView mRol;
-    private TextView mTextMensajes;
-    private TextView mIntMensajes;
     private TextView mAccelX;
     private TextView mAccelY;
     private TextView mAccelZ;
@@ -75,6 +73,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
     private TextView mGyroZ;
     private TextView mLeftMotor;
     private TextView mRightMotor;
+    private TextView mTextMensajes;
+    private TextView mIntMensajes;
 
     private String subscribeKey = "sub-c-ad722c70-4f35-11e5-9028-02ee2ddab7fe";
     private String publishKey = "pub-c-d43a5ca7-afad-4341-bd02-b8c20126c5c0";
@@ -160,7 +160,10 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                                     mQ1Value.setText( finalJmessage.getString("Qua1"));
                                     mQ2Value.setText( finalJmessage.getString("Qua2"));
                                     mQ3Value.setText( finalJmessage.getString("Qua3"));
-                                    
+
+                                    mensajesPublicados = mensajesPublicados + 1;
+                                    displayIntMensajes(mensajesPublicados);
+
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -228,6 +231,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
         mLeftMotor = (TextView) findViewById( R.id.left_motor );
         mRightMotor = (TextView) findViewById( R.id.right_motor );
+
+        mTextMensajes = (TextView) findViewById( R.id.textMensajes);
+        mIntMensajes = (TextView) findViewById( R.id.mensajes_recibidos);
     }
 
     @Override
@@ -501,9 +507,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                 parpadeo( false );
                 mRol = (TextView) findViewById( R.id.rol );
                 mRol.setText("Gateway IOT");
-                mTextMensajes = (TextView) findViewById( R.id.textMensajes);
                 mTextMensajes.setText("Mensajes Enviados");
-                mIntMensajes = (TextView) findViewById( R.id.mensajes_recibidos);
                 break;
             }
         }
