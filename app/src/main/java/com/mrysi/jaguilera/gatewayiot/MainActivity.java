@@ -48,7 +48,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
 
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 42;
     private static final float ROBOT_VELOCITY = 0.3f;
-    private int mensajesPublicados = 0;
+    private int mensajesTransmitidos = 0;
 
     private DualStackDiscoveryAgent mDiscoveryAgent;
 
@@ -161,8 +161,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                                     mQ2Value.setText( finalJmessage.getString("Qua2"));
                                     mQ3Value.setText( finalJmessage.getString("Qua3"));
 
-                                    mensajesPublicados = mensajesPublicados + 1;
-                                    displayIntMensajes(mensajesPublicados);
+                                    mensajesTransmitidos = mensajesTransmitidos + 1;
+                                    displayIntMensajes(mensajesTransmitidos);
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -565,8 +565,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                 mensajeJson.put("Qua3", String.format( "%.5f", quaternion.getQ3() ));
                 mensajeJson.put("BEL", String.valueOf( sensor.leftMotorValue ));
                 mensajeJson.put("BER", String.valueOf( sensor.rightMotorValue ));
-                mensajesPublicados = mensajesPublicados + 1;
-                displayIntMensajes(mensajesPublicados);
+                mensajesTransmitidos = mensajesTransmitidos + 1;
+                displayIntMensajes(mensajesTransmitidos);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -602,9 +602,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Robo
                     super.errorCallback(channel, error);
                 }
             });
+
         }
     }
 
+    //Métodos para despliegue de información en la interface de usuario.
     private void displayBackEMF( int BEL, int BER ) {
         mLeftMotor.setText( String.valueOf( BEL ) );
         mRightMotor.setText( String.valueOf( BER ) );
